@@ -125,6 +125,7 @@
             animation: slideIn 0.3s ease-out forwards;
             margin-bottom: 16px;
             width: 100%;
+            align-items: flex-start;
         }
 
         .ken-ai-message.ai {
@@ -133,12 +134,12 @@
         }
 
         .ken-ai-message.user {
-            flex-direction: column;
-            align-items: flex-end;
+            flex-direction: row-reverse;
             padding-left: 10%;
         }
 
         .ken-ai-avatar {
+            flex-shrink: 0;
             width: 35px;
             height: 35px;
             border-radius: 12px;
@@ -147,14 +148,16 @@
             align-items: center;
             justify-content: center;
             font-size: 16px;
-        }        .ken-ai-message-content {
-            max-width: 80%;
-            padding: 16px;
-            border-radius: 12px;
-            font-size: 14px;
-            line-height: 1.6;
-            white-space: normal;
-            word-wrap: break-word;
+        }       
+ .ken-ai-message-content {
+  
+    padding: 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.6;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
         }
 
         .ken-ai-message-content strong,
@@ -794,10 +797,10 @@ Resposta:`;
             
             // Adiciona o texto se houver
             if (text) {
-                messageContent += `<div class="ken-ai-message-content">${text}</div>`;
+                messageContent += text;
             } else if (images.length > 0) {
-                // Se só tiver imagens, adiciona um container vazio para manter o layout
-                messageContent += '<div class="ken-ai-message-content"></div>';
+                // Se só tiver imagens, adiciona um espaço em branco para manter o layout
+                messageContent += '&nbsp;';
             }
             
             // Adiciona a mensagem do usuário
