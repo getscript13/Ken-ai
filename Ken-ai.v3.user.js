@@ -3,10 +3,12 @@
 // @namespace    http://tampermonkey.net/
 // @version      1.0
 // @description  Assistente AI para Plurall
-// @author       Seu Nome
+// @author       Ken
 // @match        https://*.plurall.net/*
 // @grant        none
 // @require      https://cdn.jsdelivr.net/npm/marked/marked.min.js
+// @require      https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js
+// @require      https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js
 // ==/UserScript==
 
 (function() {
@@ -15,6 +17,28 @@
     // Estilos do Ken AI
     const styles = `
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+        @import url('https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css');
+
+        /* Customização do KaTeX para tema escuro */
+        .katex {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 1.1em;
+        }
+        
+        .ken-ai-message-content .math-block {
+            padding: 1em;
+            margin: 0.5em 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            overflow-x: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .ken-ai-message-content .math-inline {
+            padding: 0.2em 0.4em;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
 
         .ken-ai-panel {
             position: fixed;
@@ -87,28 +111,91 @@
         }
 
         .ken-ai-welcome {
-            padding: 40px;
+            padding: 25px;
             text-align: center;
             animation: fadeIn 0.5s ease-out;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.03);
             border-radius: 15px;
             margin: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
 
         .ken-ai-welcome h1 {
-            font-size: 32px;
-            margin-bottom: 20px;
-            background: linear-gradient(135deg, #FFFFFF, #E0E0FF);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: 28px;
+            margin-bottom: 12px;
+            color: white;
             font-weight: 700;
         }
 
         .ken-ai-welcome p {
             color: rgba(255, 255, 255, 0.9);
-            line-height: 1.7;
-            font-size: 16px;
-            margin-bottom: 25px;
+            line-height: 1.5;
+            font-size: 15px;
+            margin-bottom: 20px;
+        }
+
+        .ken-ai-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .ken-ai-feature-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .ken-ai-feature-item:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .ken-ai-feature-icon {
+            font-size: 20px;
+            color: white;
+        }
+
+        .ken-ai-feature-text {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+
+        .ken-ai-cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #5856D6, #673AB7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 500;
+            margin-top: 10px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 15px;
+            text-decoration: none;
+        }
+
+        .ken-ai-cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(88, 86, 214, 0.2);
+        }
+
+        .ken-ai-cta-button svg {
+            width: 18px;
+            height: 18px;
         }
 
         .ken-ai-chat {
@@ -150,13 +237,13 @@
             font-size: 16px;
         }       
  .ken-ai-message-content {
-  
     padding: 16px;
     border-radius: 12px;
     font-size: 14px;
     line-height: 1.6;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    width: fit-content;
 }
         }
 
@@ -168,6 +255,7 @@
 
         .ken-ai-message.ai .ken-ai-message-content {
             background: rgba(255, 255, 255, 0.05);
+            max-width: 90%;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }        /* Estilos para markdown */
         .ken-ai-message-content h1,
@@ -309,6 +397,11 @@
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-20px); }
         }        .ken-ai-image-btn {
             background: none;
             border: none;
@@ -487,32 +580,161 @@
             padding-left: 10%;
         }
 
+        /* Menu UI */
+        .ken-ai-menu {
+            position: absolute;
+            left: 10px;
+            top: 510px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 8px;
+            z-index: 2147483646;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            user-select: none;
+            width: fit-content;
+            height: fit-content;
+            cursor: move; /* Indica que todo o menu é arrastável */
+        }
+
+        .ken-ai-menu-drag {
+            display: flex;
+            gap: 3px;
+            justify-content: center;
+            align-items: center;
+            padding: 4px;
+            height: 24px; /* Aumenta a altura da área de arrasto */
+            width: 100%;
+            cursor: move;
+            margin-bottom: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        .ken-ai-menu-drag-dot {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            transition: background 0.2s ease;
+        }
+
+        .ken-ai-menu:hover .ken-ai-menu-drag-dot {
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .ken-ai-menu-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .ken-ai-menu-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .ken-ai-menu-button svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Tooltip */
+        .ken-ai-menu-button::before {
+            content: attr(data-tooltip);
+            position: absolute;
+            right: calc(100% + 8px);
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .ken-ai-menu-button:hover::before {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Estilos para mensagens com imagens */
         .ken-ai-message-images {
-            display: grid;
+            display: flex;
+            flex-wrap: wrap;
             gap: 8px;
             width: 100%;
-            margin-bottom: 8px;
-        }
-
-        .ken-ai-message-images.image-count-1 {
-            grid-template-columns: minmax(0, 300px);
-        }
-
-        .ken-ai-message-images.image-count-2 {
-            grid-template-columns: repeat(2, minmax(0, 200px));
-        }
-
-        .ken-ai-message-images.image-count-3 {
-            grid-template-columns: repeat(3, minmax(0, 150px));
+            margin-bottom: 12px;
+            justify-content: flex-start;
+            align-items: flex-start;
+            max-width: 100%;
         }
 
         .ken-ai-message-images img {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
+            max-width: 100%;
+            max-height: 300px;
+            object-fit: contain;
             border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.2);
+            padding: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .ken-ai-message-images.image-count-1 img {
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .ken-ai-message-images.image-count-2 img {
+            max-width: calc(50% - 4px);
+            width: 250px;
+        }
+
+        .ken-ai-message-images.image-count-3 img {
+            max-width: calc(33.33% - 6px);
+            width: 200px;
+        }
+
+        /* Hover effect para ampliar a imagem */
+        .ken-ai-message-images img:hover {
+            cursor: zoom-in;
+            transform: scale(1.02);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+        }
+
+        /* Ajustes para o container da mensagem do usuário */
+        .ken-ai-message.user {
+            margin-left: auto;
+            align-items: flex-end;
+            width: fit-content;
+        }
+
+        /* Aplica largura máxima apenas quando há imagens */
+        .ken-ai-message.user:has(.ken-ai-message-images) {
+            max-width: 85%;
+            width: 100%;
+        }
+
+        .ken-ai-message.user .ken-ai-message-content {
+            margin-top: 8px;
+            margin-left: auto;
         }
 
         // ...existing code...
@@ -546,13 +768,38 @@
             </button>
         </div>
         <div class="ken-ai-welcome" id="kenAiWelcome">
-            <h1>Bem-vindo ao Ken AI</h1>
-            <p>Olá! 👋 Sou seu assistente pessoal para estudos. Estou aqui para ajudar você a aprender de forma mais eficiente e divertida! Vamos começar?</p>
+            <h1 style="color: white;">Bem-vindo ao Ken AI</h1>
+            <p>Olá! 👋 Seu assistente de estudos inteligente, pronto para ajudar você a aprender de forma mais eficiente e divertida!</p>
+            
             <div class="ken-ai-features">
-                <span>🚀 Respostas Rápidas</span>
-                <span>📚 Explicações Detalhadas</span>
-                <span>💡 Dicas Inteligentes</span>
+                <div class="ken-ai-feature-item">
+                    <div style="color: white;" class="ken-ai-feature-icon">🎯</div>
+                    <div class="ken-ai-feature-text">Respostas Precisas</div>
+                </div>
+                <span id="ken-divisor"></span>
+
+                <div class="ken-ai-feature-item">
+                    <div style="color: white;" class="ken-ai-feature-icon">🔍</div>
+                    <div class="ken-ai-feature-text">Análise de Imagens</div>
+                </div>
+                
+                <div class="ken-ai-feature-item">
+                    <div style="color: white;" class="ken-ai-feature-icon">📚</div>
+                    <div class="ken-ai-feature-text">Apoio Educacional</div>
+                </div>
+                
+                <div class="ken-ai-feature-item">
+                    <div style="color: white;" class="ken-ai-feature-icon">⚡</div>
+                    <div class="ken-ai-feature-text">Resposta Instantânea</div>
+                </div>
             </div>
+
+            <button class="ken-ai-cta-button">
+                <span>Vamos Começar!</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </button>
         </div>
         <div class="ken-ai-chat">
             <!-- Messages will be added here dynamically -->
@@ -589,7 +836,120 @@
 
     // Adiciona os elementos ao documento
     document.body.appendChild(panel);
-    document.body.appendChild(toggleArea);    // Função para carregar o Marked.js
+    document.body.appendChild(toggleArea);
+
+    // Função para mostrar/ocultar a tela de boas-vindas
+    function toggleWelcomeScreen(show = true) {
+        const welcome = panel.querySelector('#kenAiWelcome');
+        const chat = panel.querySelector('.ken-ai-chat');
+        
+        if (show) {
+            welcome.style.display = 'block';
+            welcome.style.animation = 'fadeIn 0.5s ease-out forwards';
+            chat.innerHTML = ''; // Limpa o chat
+        } else {
+            welcome.style.animation = 'fadeOut 0.5s ease-out forwards';
+            setTimeout(() => {
+                welcome.style.display = 'none';
+            }, 500);
+        }
+    }
+
+    // Adiciona evento de clique no botão CTA
+    const ctaButton = panel.querySelector('.ken-ai-cta-button');
+    if (ctaButton) {
+        ctaButton.addEventListener('click', () => toggleWelcomeScreen(false));
+    }
+
+    // Atualiza a função clearChat para mostrar a tela de boas-vindas
+    function clearChat() {
+        toggleWelcomeScreen(true);
+    }
+
+    // Cria o menu UI fixo
+    const menu = document.createElement("div");
+    menu.className = "ken-ai-menu";
+    menu.innerHTML = `
+        <div class="ken-ai-menu-drag">
+            <span class="ken-ai-menu-drag-dot"></span>
+            <span class="ken-ai-menu-drag-dot"></span>
+            <span class="ken-ai-menu-drag-dot"></span>
+        </div>
+        <button class="ken-ai-menu-button" id="clearChat" data-tooltip="Limpar Chat">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 6H5m14 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3-3h6M9 10v8m6-8v8"/>
+            </svg>
+        </button>
+    `;
+    panel.appendChild(menu);
+
+    // Adiciona funcionalidade de arrastar em todo o menu
+    let isDragging = false;
+    let startX;
+    let startY;
+    let startLeft;
+    let startTop;
+
+    const startDragging = (e) => {
+        isDragging = true;
+        
+        // Guarda a posição inicial do mouse
+        startX = e.clientX;
+        startY = e.clientY;
+        
+        // Guarda a posição inicial do menu
+        const rect = menu.getBoundingClientRect();
+        startLeft = rect.left - panel.getBoundingClientRect().left;
+        startTop = rect.top - panel.getBoundingClientRect().top;
+        
+        // Previne seleção de texto durante o arrasto
+        e.preventDefault();
+    };
+
+    const onDrag = (e) => {
+        if (!isDragging) return;
+        
+        e.preventDefault();
+        
+        // Calcula o deslocamento do mouse
+        const deltaX = e.clientX - startX;
+        const deltaY = e.clientY - startY;
+        
+        // Calcula as novas posições
+        let newLeft = startLeft + deltaX;
+        let newTop = startTop + deltaY;
+        
+        // Obtém as dimensões do painel e do menu
+        const panelRect = panel.getBoundingClientRect();
+        const menuRect = menu.getBoundingClientRect();
+        
+        // Limita as posições dentro do painel
+        newLeft = Math.max(0, Math.min(newLeft, panelRect.width - menuRect.width));
+        newTop = Math.max(0, Math.min(newTop, panelRect.height - menuRect.height));
+        
+        // Aplica as novas posições
+        menu.style.position = 'absolute';
+        menu.style.left = `${newLeft}px`;
+        menu.style.top = `${newTop}px`;
+    };
+
+    const stopDragging = () => {
+        isDragging = false;
+    };
+
+    // Adiciona os event listeners ao menu inteiro
+    menu.addEventListener('mousedown', startDragging);
+    document.addEventListener('mousemove', onDrag);
+    document.addEventListener('mouseup', stopDragging);
+
+    // Previne que os botões dentro do menu iniciem o arrasto
+    menu.querySelectorAll('button').forEach(button => {
+        button.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+        });
+    });
+
+    // Função para carregar o Marked.js
     function loadMarked() {
         return new Promise((resolve, reject) => {
             const script = document.createElement('script');
@@ -613,29 +973,155 @@
         console.log('Marked.js carregado com sucesso!');
     }).catch(console.error);
 
-    // Função para formatar a resposta da IA
+    // Função para processar LaTeX com mais segurança
+    function processLatex(content) {
+        // Configura opções do KaTeX
+        const katexOptions = {
+            throwOnError: false,
+            strict: false,
+            trust: true,
+            macros: {
+                "\\R": "\\mathbb{R}",
+                "\\N": "\\mathbb{N}",
+                "\\Z": "\\mathbb{Z}"
+            }
+        };
+        
+        // Função para limpar e normalizar LaTeX
+        function cleanLatex(latex) {
+            return latex.trim()
+                .replace(/\\{2,}/g, '\\\\') // Corrige múltiplas barras
+                .replace(/\s+/g, ' ') // Remove espaços extras
+                .replace(/([^\\])\{/g, '$1\\{') // Escapa chaves não escapadas
+                .replace(/([^\\])\}/g, '$1\\}')
+                .replace(/\s*([+\-=<>])\s*/g, ' $1 ') // Espaça operadores
+                .replace(/\\:/g, ' ') // Substitui \: por espaço
+                .replace(/\\,/g, ' '); // Substitui \, por espaço
+        }
+
+        // Processa blocos de LaTeX ($$...$$)
+        content = content.replace(/\$\$([\s\S]*?)\$\$/g, (match, latex) => {
+            try {
+                const cleanedLatex = cleanLatex(latex);
+                return `<div class="math-block">${katex.renderToString(cleanedLatex, { 
+                    ...katexOptions,
+                    displayMode: true,
+                    fleqn: true, // Alinhamento à esquerda
+                    minRuleThickness: 0.06,
+                    maxSize: 20,
+                    maxExpand: 1000
+                })}</div>`;
+            } catch (e) {
+                console.error('Erro ao renderizar LaTeX block:', e, latex);
+                // Tenta recuperar removendo caracteres problemáticos
+                try {
+                    const recovered = cleanLatex(latex).replace(/[^\w\s\\\{\}\[\]\(\)\+\-=><\.,\^_\|\&\#\%\$]/g, '');
+                    return `<div class="math-block">${katex.renderToString(recovered, {
+                        ...katexOptions,
+                        displayMode: true
+                    })}</div>`;
+                } catch (e2) {
+                    return `<div class="math-block error">${latex}</div>`;
+                }
+            }
+        });
+
+        // Processa LaTeX inline ($...$)
+        content = content.replace(/\$([^\$\n]+?)\$/g, (match, latex) => {
+            try {
+                const cleanedLatex = cleanLatex(latex);
+                return `<span class="math-inline">${katex.renderToString(cleanedLatex, {
+                    ...katexOptions,
+                    displayMode: false,
+                    fontSize: '1.1em'
+                })}</span>`;
+            } catch (e) {
+                console.error('Erro ao renderizar LaTeX inline:', e, latex);
+                // Tenta recuperar removendo caracteres problemáticos
+                try {
+                    const recovered = cleanLatex(latex).replace(/[^\w\s\\\{\}\[\]\(\)\+\-=><\.,\^_\|\&\#\%\$]/g, '');
+                    return `<span class="math-inline">${katex.renderToString(recovered, {
+                        ...katexOptions,
+                        displayMode: false
+                    })}</span>`;
+                } catch (e2) {
+                    return `<span class="math-inline error">${latex}</span>`;
+                }
+            }
+        });
+
+        // Remove espaços extras entre elementos
+        content = content
+            .replace(/>\s+</g, '><')
+            .replace(/\s+/g, ' ')
+            .trim();
+
+        return content;
+    }
+
+    // Função para formatar a resposta da IA com melhor tratamento de Markdown e LaTeX
     async function formatAIResponse(text) {
         try {
             if (!markedInstance) {
                 markedInstance = await loadMarked();
             }
 
-            // Remove tags HTML não desejadas
-            text = text.replace(/<[^>]*>/g, '');
+            // Pré-processamento do texto
+            text = text
+                // Remove tags HTML
+                .replace(/<[^>]*>/g, '')
+                // Remove estilos inline
+                .replace(/style="[^"]*"/g, '')
+                // Normaliza quebras de linha
+                .replace(/\r\n/g, '\n')
+                .replace(/\n{3,}/g, '\n\n')
+                // Normaliza espaços em LaTeX
+                .replace(/\$\s+/g, '$')
+                .replace(/\s+\$/g, '$')
+                .replace(/\$\$\s+/g, '$$')
+                .replace(/\s+\$\$/g, '$$');
+            
+            // Protege blocos LaTeX
+            const mathBlocks = [];
+            text = text.replace(/(\$\$[\s\S]*?\$\$|\$[^\$\n]+?\$)/g, (match, latex) => {
+                // Remove espaços extras dentro do LaTeX
+                const cleanLatex = match
+                    .replace(/\s+/g, ' ')
+                    .trim();
+                mathBlocks.push(cleanLatex);
+                return `@@MATH${mathBlocks.length - 1}@@`;
+            });
             
             // Melhora a formatação do texto para markdown
             text = text
+                // Headers
                 .replace(/^Título:\s*(.*?)$/gm, '## $1')
                 .replace(/^Subtítulo:\s*(.*?)$/gm, '### $1')
+                // Listas
                 .replace(/^[-*]\s*(.*?)$/gm, '• $1')
+                // Destaques
                 .replace(/\b(Importante|Nota|Dica):\s*/g, '**$1:** ')
                 .replace(/\b(Conceito|Definição):\s*/g, '_$1:_ ')
+                // Exemplos
                 .replace(/\b(Exemplo|Caso):\s*/g, '> $1: ')
-                .replace(/`(.*?)`/g, '`$1`')
-                .replace(/^(Seção|Parte)\s*(\d+):\s*(.*?)$/gm, '### $1 $2: $3');
+                // Código
+                .replace(/`([^`]+)`/g, '`$1`')
+                // Seções
+                .replace(/^(Seção|Parte)\s*(\d+):\s*(.*?)$/gm, '### $1 $2: $3')
+                // Remove espaços extras antes/depois de fórmulas
+                .replace(/\s*\$\$/g, '$$')
+                .replace(/\$\$\s*/g, '$$');
 
-            // Converte o markdown para HTML
-            return markedInstance.parse(text);
+            // Primeiro converte o markdown para HTML
+            let html = markedInstance.parse(text);
+            
+            // Restaura os blocos LaTeX
+            html = html.replace(/@@MATH(\d+)@@/g, (_, index) => mathBlocks[index]);
+            
+            // Por fim processa o LaTeX
+            html = processLatex(html);
+
+            return html;
         } catch (error) {
             console.error('Erro ao formatar resposta:', error);
             return text;
@@ -672,41 +1158,31 @@
 
     // Função para criar o prompt contextualizado
     function createContextualPrompt(userText, images = []) {
-        const basePrompt = `Você é o Ken AI, um assistente educacional amigável e focado. Responda sempre de forma relevante à pergunta do estudante.
+ const basePrompt = `Você é o Ken AI, assistente educacional focado em respostas precisas.
 
-Se for uma saudação ou pergunta casual, responda de forma amigável e breve.
-Se for uma pergunta sobre conteúdo educacional, então use a seguinte estrutura:
-Se tiver IMAGEM, Responda certa veja a IMAGEM atentamente e fale a resposta CORRETA.
+ISSO É SÓ SUA REGRA SÓ PRA VC NÃO SE ESQUECER, NAS RESPOSTA FALE NORMALMENTE SEM FICA ARRUMANDO COISA MECIONADA AQUI NAS REGRAS,
+ AS REGRAS É PRA VOCÊ SEGUIR E DA ALGO BONITO E CERTO.
+Não ultilize nada daqui nas resposta como CLONE.
+NÃO ARRUME (RESPOSTA NA CONVERSA, SÓ FALE A RESPOSTA QUANDO OUVER UMA PERGUNTA ALTERNATIVA).
 
-1. Use formatação markdown para organização:
-   - Títulos (## para seções principais, ### para subseções)
-   - Listas com marcadores (•) para pontos importantes
-   - **Negrito** para conceitos-chave
-   - _Itálico_ para definições
-   - \`código\` para termos técnicos
-   - > Para exemplos práticos
 
-2. Estruture respostas educacionais com:
-   - Breve introdução
-   - Explicação clara
-   - Exemplos quando necessário
-   - Conclusão concisa
+2. SEGUNDO:
+   - Use markdown para organizar o conteúdo
+   - LaTeX para fórmulas: $inline$ ou $$bloco$$
+   - Estrutura clara e objetiva
 
-3. Use linguagem:
-   - Clara e direta
-   - Adequada ao contexto
-   - Amigável e motivadora
+3. QUEM TE CRIOU?: Kenite - Kelve.
 
-4. Se houver imagens, faça referência a elas na resposta.
-    - Analise cada detalhe da imagem fornecida.
-${images.length > 0 ? 'ATENÇÃO ESPECIAL: Analise cada detalhe da imagem fornecida. Sua resposta deve ser baseada diretamente no que é visível na imagem Fale certo.' : ''}
+${images.length > 0 ? `
+🔍 ANÁLISE DE IMAGEM:
+- Examine todos os detalhes visuais
+- Base a resposta apenas no que está visível
+` : ''}
 
-Mantenha foco total na pergunta. Seja direto e assertivo. Precisão é sua prioridade máxima.
+Pergunta: ${userText}
 
-Pergunta do estudante: ${userText}
 
 Resposta:`;
-
         return basePrompt;
     }
 
@@ -746,10 +1222,10 @@ Resposta:`;
                         parts: parts
                     }],
                     generationConfig: {
-                        temperature: 0.7,
-                        topK: 32,
-                        topP: 1,
-                        maxOutputTokens: 2048,
+                       temperature: 1,
+                        topP: 0.95,
+                        topK: 40,
+                        maxOutputTokens: 8192,
                     }
                 })
             });
@@ -772,6 +1248,36 @@ Resposta:`;
             return 'Desculpe, tive um problema ao processar sua pergunta. Pode tentar novamente?';
         }
     }
+
+    // Atualiza a função de adicionar mensagem para ocultar a tela de boas-vindas
+    async function addMessage(text, isAi = false) {
+        toggleWelcomeScreen(false); // Esconde a tela de boas-vindas ao adicionar mensagem
+        
+        const chat = panel.querySelector('.ken-ai-chat');
+        const message = document.createElement('div');
+        message.className = `ken-ai-message ${isAi ? 'ai' : 'user'}`;
+        
+        let formattedText = text;
+        if (isAi) {
+            try {
+                formattedText = await formatAIResponse(text);
+            } catch (error) {
+                console.error('Erro ao formatar mensagem:', error);
+            }
+        }
+        
+        message.innerHTML = `
+            <div class="ken-ai-avatar">${isAi ? '🤖' : '👤'}</div>
+            <div class="ken-ai-message-content">${formattedText}</div>
+        `;
+        
+        chat.appendChild(message);
+        message.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Adiciona o listener para o botão de limpar chat
+    const clearChatButton = panel.querySelector('#clearChat');
+    clearChatButton.addEventListener('click', clearChat);
 
     // Atualiza a função handleSend
     async function handleSend() {
