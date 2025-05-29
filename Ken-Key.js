@@ -98,8 +98,9 @@ window.kenKey = {
     }
 };
 
-// Exporta o gerenciador de chaves
-window.KenKeyManager = KenKeyManager;
+// Cria uma única instância global
+window.kenKeyManager = new KenKeyManager();
+window.KenKeyManager = KenKeyManager; // Expõe a classe também
 
 // Inicializa com a chave padrão
 keyManager.resetKey();
