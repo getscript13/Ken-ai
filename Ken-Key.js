@@ -11,13 +11,11 @@ class KenKeyManager {
         reset: 'color: inherit;'
     };
 
-    validateKey(key) {
-        // Se nenhuma chave for fornecida, usa a chave padrão
-        if (!key) {
-            key = this.defaultKey;
+    validateKey(key = this.defaultKey) {
+        // Se for a chave padrão, aceita direto
+        if (key === this.defaultKey) {
             console.log(
-                '%c[Ken AI Key]%c Usando chave padrão! %cA IA está pronta para uso.',
-                KenKeyManager.styles.info,
+                '%c[Ken AI Key]%c Usando chave padrão',
                 KenKeyManager.styles.info,
                 KenKeyManager.styles.reset
             );
@@ -28,7 +26,7 @@ class KenKeyManager {
         // Verifica se a chave tem o formato correto
         if (key.startsWith(this.keyPrefix) && key.length >= 39) {
             console.log(
-                '%c[Ken AI Key]%c Chave personalizada válida! %cA IA está pronta para uso.',
+                '%c[Ken AI Key]%c Chave personalizada válida! %cIA pronta para uso',
                 KenKeyManager.styles.success,
                 KenKeyManager.styles.success,
                 KenKeyManager.styles.reset
@@ -44,32 +42,56 @@ class KenKeyManager {
             KenKeyManager.styles.reset
         );
         window.GEMINI_API_KEY = this.defaultKey;
+        this.showHelp();
         return true;
     }
 
-    setCustomKey(newKey) {
-        if (this.validateKey(newKey)) {
-            console.log(
-                '%c[Ken AI Key]%c Chave alterada com sucesso! %cNova chave está em uso.',
-                KenKeyManager.styles.success,
-                KenKeyManager.styles.success,
-                KenKeyManager.styles.reset
-            );
-            return true;
-        }
-        return false;
-    }
-
-    resetToDefaultKey() {
-        window.GEMINI_API_KEY = this.defaultKey;
+    showHelp() {
         console.log(
-            '%c[Ken AI Key]%c Sistema resetado! %cUsando chave padrão.',
+            '%c[Ken AI Key]%c Comandos disponíveis:\n' +
+            '• %cken-key set SUA-CHAVE%c - Define uma nova chave\n' +
+            '• %cken-key reset%c - Volta para a chave padrão\n' +
+            '• %cken-key help%c - Mostra esta ajuda',
             KenKeyManager.styles.info,
-            KenKeyManager.styles.info,
+            KenKeyManager.styles.reset,
+            KenKeyManager.styles.success,
+            KenKeyManager.styles.reset,
+            KenKeyManager.styles.success,
+            KenKeyManager.styles.reset,
+            KenKeyManager.styles.success,
             KenKeyManager.styles.reset
         );
     }
 }
 
+// Define o comando global ken-key
+window.kenKey = {
+    set: function(key) {
+        const manager = new KenKeyManager();
+        manager.validateKey(key);
+    },
+    reset: function() {
+        const manager = new KenKeyManager();
+        manager.validateKey(manager.defaultKey);
+    },
+    help: function() {
+        const manager = new KenKeyManager();
+        manager.showHelp();
+    }
+};
+
 // Exporta o gerenciador de chaves
 window.KenKeyManager = KenKeyManager;
+
+// Inicializa com a chave padrão
+const initialManager = new KenKeyManager();
+initialManager.validateKey();
+
+// Mensagem inicial no console
+console.log(
+    '%c[Ken AI Key]%c Sistema pronto! Digite %cken-key help%c para ver os comandos',
+    KenKeyManager.styles.info,
+    KenKeyManager.styles.reset,
+    KenKeyManager.styles.success,
+    KenKeyManager.styles.reset
+);
