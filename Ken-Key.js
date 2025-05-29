@@ -74,42 +74,62 @@ class KenKeyManager {
     }
 }
 
-// Cria uma única instância do gerenciador
-const keyManager = new KenKeyManager();
+// Expõe a classe globalmente
+window.KenKeyManager = KenKeyManager;
 
-// Define o comando global kenKey
-window.kenKey = {
-    set: function(key) {
-        keyManager.setKey(key);
-    },
-    reset: function() {
-        keyManager.resetKey();
-    },
-    show: function() {
+// Função para inicializar o sistema de chaves
+function initializeKeySystem() {
+    // Cria uma única instância global
+    const keyManager = new KenKeyManager();
+    window.kenKeyManager = keyManager;
+
+    // Define o comando global kenKey
+    window.kenKey = {
+        set: function(key) {
+            keyManager.setKey(key);
+        },
+        reset: function() {
+            keyManager.resetKey();
+        },
+        show: function() {
+            console.log(
+                '%c[Ken AI Key]%c Chave atual: %c' + keyManager.getKey(),
+                KenKeyManager.styles.info,
+                KenKeyManager.styles.reset,
+                KenKeyManager.styles.success
+            );
+        },
+        help: function() {
+            keyManager.showCommands();
+        }
+    };
+
+    // Inicializa com a chave padrão
+    keyManager.resetKey();
+
+    return keyManager;
+}
+
+// Inicializa o sistema quando o documento estiver pronto
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        initializeKeySystem();
         console.log(
-            '%c[Ken AI Key]%c Chave atual: %c' + keyManager.getKey(),
+            '%c[Ken AI Key]%c Sistema pronto! Use %ckenKey.help()%c para ver os comandos disponíveis',
             KenKeyManager.styles.info,
             KenKeyManager.styles.reset,
-            KenKeyManager.styles.success
+            KenKeyManager.styles.success,
+            KenKeyManager.styles.reset
         );
-    },
-    help: function() {
-        keyManager.showCommands();
-    }
-};
-
-// Cria uma única instância global
-window.kenKeyManager = new KenKeyManager();
-window.KenKeyManager = KenKeyManager; // Expõe a classe também
-
-// Inicializa com a chave padrão
-keyManager.resetKey();
-
-// Mostra os comandos disponíveis no console
-console.log(
-    '%c[Ken AI Key]%c Sistema pronto! Use %ckenKey.help()%c para ver os comandos disponíveis',
-    KenKeyManager.styles.info,
-    KenKeyManager.styles.reset,
-    KenKeyManager.styles.success,
-    KenKeyManager.styles.reset
-);
+    });
+} else {
+    initializeKeySystem();
+    console.log(
+        '%c[Ken AI Key]%c Sistema pronto! Use %ckenKey.help()%c para ver os comandos disponíveis',
+        KenKeyManager.styles.info,
+        KenKeyManager.styles.reset,
+        KenKeyManager.styles.success,
+        KenKeyManager.styles.reset
+    );
+}
+///1
