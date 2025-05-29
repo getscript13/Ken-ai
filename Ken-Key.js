@@ -9,9 +9,12 @@ class KenKeyManager {
         error: 'color: #F44336; font-weight: bold; font-size: 14px;',
         info: 'color: #2196F3; font-weight: bold; font-size: 14px;',
         reset: 'color: inherit;'
-    };
+    };    validateKey(key = this.defaultKey) {
+        // Garante que a chave padrão esteja sempre definida primeiro
+        if (!window.GEMINI_API_KEY) {
+            window.GEMINI_API_KEY = this.defaultKey;
+        }
 
-    validateKey(key = this.defaultKey) {
         // Se for a chave padrão, aceita direto
         if (key === this.defaultKey) {
             console.log(
