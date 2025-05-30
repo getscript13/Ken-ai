@@ -9,10 +9,28 @@
 // @require      https://cdn.jsdelivr.net/npm/marked/marked.min.js
 // @require      https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js
 // @require      https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js
+// @require      https://raw.githubusercontent.com/getscript13/Ken-ai/refs/heads/main/ken-ai.ui1.js
+// @require      https://raw.githubusercontent.com/getscript13/Ken-ai/refs/heads/main/Ken-Key2.js
+// @require      https://raw.githubusercontent.com/getscript13/Ken-ai/refs/heads/main/ken-prompt2.js
 // ==/UserScript==
 
 (function() {
     'use strict';
+    
+    // Espera o sistema de chaves estar pronto antes de inicializar
+    const waitForKeyManager = () => {
+        if (window.kenKeyManager) {
+            // Sistema de chaves está pronto
+            console.log('%c[Ken AI]%c Sistema de chaves detectado!', 'color: #2196F3; font-weight: bold;', 'color: inherit;');
+            window.kenKeyManager.resetKey();
+        } else {
+            // Tenta novamente em 100ms
+            setTimeout(waitForKeyManager, 100);
+        }
+    };
+    
+    // Inicia a verificação
+    waitForKeyManager();
 
     // Estilos do Ken AI
     const styles = `
@@ -1153,44 +1171,40 @@
     }
 
     // Configuração da API Gemini
-    const GEMINI_API_KEY = 'AIzaSyAgIVvbWy5DPHI18c_2Vjnw1nMS1Z4iV0Q';
     const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent';
+    
+    // Usa a chave gerenciada pelo Ken-Key.js (pode ser alterada via console com kenKey.set() ou kenKey.reset())
+    const getGeminiKey = () => window.GEMINI_API_KEY;
 
     // Função para criar o prompt contextualizado
     function createContextualPrompt(userText, images = []) {
- const basePrompt = `Você é o Ken AI, assistente educacional focado em respostas precisas.
+        // Obtém o prompt atual do gerenciador
+        const basePrompt = window.kenPromptManager ? window.kenPromptManager.getPrompt() : '';
 
-ISSO É SÓ SUA REGRA SÓ PRA VC NÃO SE ESQUECER, NAS RESPOSTA FALE NORMALMENTE SEM FICA ARRUMANDO COISA MECIONADA AQUI NAS REGRAS,
- AS REGRAS É PRA VOCÊ SEGUIR E DA ALGO BONITO E CERTO.
-Não ultilize nada daqui nas resposta como CLONE.
-NÃO ARRUME (RESPOSTA NA CONVERSA, SÓ FALE A RESPOSTA QUANDO OUVER UMA PERGUNTA ALTERNATIVA).
-
-
-2. SEGUNDO:
-   - Use markdown para organizar o conteúdo
-   - LaTeX para fórmulas: $inline$ ou $$bloco$$
-   - Estrutura clara e objetiva
-
-3. QUEM TE CRIOU?: Kenite - Kelve.
-
-${images.length > 0 ? `
+        // Adiciona instruções de análise de imagem se necessário
+        const imageInstructions = images.length > 0 ? `
 🔍 ANÁLISE DE IMAGEM:
 - Examine todos os detalhes visuais
 - Base a resposta apenas no que está visível
-` : ''}
+` : '';
+
+        return `${basePrompt}
+
+${imageInstructions}
 
 Pergunta: ${userText}
 
 
 Resposta:`;
-        return basePrompt;
     }
 
     // Função para fazer requisição à API do Gemini
     async function getGeminiResponse(prompt, images = []) {
         try {
+            // Obtém a chave atual do sistema de gerenciamento
+            const apiKey = getGeminiKey();
             const contextualPrompt = createContextualPrompt(prompt, images);
-            
+             
             // Prepara as partes do conteúdo
             const parts = [];
             
@@ -1212,7 +1226,7 @@ Resposta:`;
                 });
             }
 
-            const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+            const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1222,7 +1236,7 @@ Resposta:`;
                         parts: parts
                     }],
                     generationConfig: {
-                       temperature: 1,
+                        temperature: 1,
                         topP: 0.95,
                         topK: 40,
                         maxOutputTokens: 8192,
