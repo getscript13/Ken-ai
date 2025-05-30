@@ -17,8 +17,8 @@ class KenKeyManager {
     setKey(key) {
         if (!key) {
             console.log('\n%c┌── ERRO ────────────────────────────────────────┐', KenKeyManager.styles.error);
-            console.log('%c│ Por favor, forneça uma chave válida!             │', KenKeyManager.styles.error);
-            console.log('%c└───────────────────────────────────────────────────┘\n', KenKeyManager.styles.error);
+            console.log('%c    Por favor, forneça uma chave válida!             ', KenKeyManager.styles.error);
+            console.log('%c  └────────────────────────────────────────────────┘\n', KenKeyManager.styles.error);
             return;
         }
         
@@ -27,14 +27,14 @@ class KenKeyManager {
         
         console.log('\n%c┌── CHAVE ATUALIZADA ──────────────────────────────┐', KenKeyManager.styles.success);
         console.log(
-            '%c│ %cNova chave definida: %c%s%c                          │',
+            '%c  %cNova chave definida: %c%s%c                          ',
             KenKeyManager.styles.success,
             KenKeyManager.styles.reset,
             KenKeyManager.styles.key,
             key,
             KenKeyManager.styles.success
-        );
-        console.log('%c└───────────────────────────────────────────────────┘\n', KenKeyManager.styles.success);
+        ); 
+        console.log('%c  └───────────────────────────────────────────────────┘\n', KenKeyManager.styles.success);
     }
 
     resetKey() {
@@ -43,14 +43,14 @@ class KenKeyManager {
         
         console.log('\n%c┌── CHAVE RESTAURADA ─────────────────────────────┐', KenKeyManager.styles.info);
         console.log(
-            '%c│ %cUsando chave padrão: %c%s%c                          │',
+            '%c  %cUsando chave padrão: %c%s%c                          ',
             KenKeyManager.styles.info,
             KenKeyManager.styles.reset,
             KenKeyManager.styles.key,
             this.defaultKey,
             KenKeyManager.styles.info
         );
-        console.log('%c└───────────────────────────────────────────────────┘\n', KenKeyManager.styles.info);
+        console.log('%c  └───────────────────────────────────────────────────┘\n', KenKeyManager.styles.info);
     }
 
     getKey() {
@@ -59,9 +59,9 @@ class KenKeyManager {
 
     showCommands() {
         console.log('\n%c┌── COMANDOS DISPONÍVEIS ──────────────────────────┐', KenKeyManager.styles.title);
-        console.log('%c│                                                   │', KenKeyManager.styles.title);
+        console.log('%c                                                   ', KenKeyManager.styles.title);
         console.log(
-            '%c│ %c• %ckenKey.set("CHAVE")%c - Define nova chave API       %c│',
+            '%c  %c• %ckenKey.set("CHAVE")%c - Define nova chave API       %c',
             KenKeyManager.styles.title,
             KenKeyManager.styles.divider,
             KenKeyManager.styles.info,
@@ -69,7 +69,7 @@ class KenKeyManager {
             KenKeyManager.styles.title
         );
         console.log(
-            '%c│ %c• %ckenKey.reset()%c - Restaura chave padrão            %c│',
+            '%c %c• %ckenKey.reset()%c - Restaura chave padrão            %c',
             KenKeyManager.styles.title,
             KenKeyManager.styles.divider,
             KenKeyManager.styles.info,
@@ -77,7 +77,7 @@ class KenKeyManager {
             KenKeyManager.styles.title
         );
         console.log(
-            '%c│ %c• %ckenKey.show()%c - Mostra chave atual                %c│',
+            '%c %c• %ckenKey.show()%c - Mostra chave atual                %c',
             KenKeyManager.styles.title,
             KenKeyManager.styles.divider,
             KenKeyManager.styles.info,
@@ -85,14 +85,14 @@ class KenKeyManager {
             KenKeyManager.styles.title
         );
         console.log(
-            '%c│ %c• %ckenKey.help()%c - Exibe este menu de ajuda          %c│',
+            '%c  %c• %ckenKey.help()%c - Exibe este menu de ajuda          %c',
             KenKeyManager.styles.title,
             KenKeyManager.styles.divider,
             KenKeyManager.styles.info,
             KenKeyManager.styles.reset,
             KenKeyManager.styles.title
         );
-        console.log('%c│                                                   │', KenKeyManager.styles.title);
+        console.log('%c                                                     ', KenKeyManager.styles.title);
         console.log('%c└───────────────────────────────────────────────────┘\n', KenKeyManager.styles.title);
 
         // Mostra a chave atual
@@ -146,23 +146,23 @@ function initializeKeySystem() {
 // Função para exibir mensagem de inicialização
 function showInitMessage() {
     console.log('\n%c┌── KEN AI - SISTEMA DE CHAVES ───────────────────┐', KenKeyManager.styles.title);
-    console.log('%c│                                                   │', KenKeyManager.styles.title);
+    console.log('%c                                                    ', KenKeyManager.styles.title);
     console.log(
-        '%c│ %c✓ Sistema Iniciado com Sucesso!                    %c│',
+        '%c  %c✓ Sistema Iniciado com Sucesso!                    %c ',
         KenKeyManager.styles.title,
         KenKeyManager.styles.success,
         KenKeyManager.styles.title
     );
     console.log(
-        '%c│ %c➤ Use %ckenKey.help()%c para ver os comandos           %c│',
+        '%c  %c➤ Use %ckenKey.help()%c para ver os comandos           %c',
         KenKeyManager.styles.title,
         KenKeyManager.styles.reset,
         KenKeyManager.styles.info,
         KenKeyManager.styles.reset,
         KenKeyManager.styles.title
     );
-    console.log('%c│                                                   │', KenKeyManager.styles.title);
-    console.log('%c└───────────────────────────────────────────────────┘\n', KenKeyManager.styles.title);
+    console.log('%c                                                    ', KenKeyManager.styles.title);
+    console.log('%c └───────────────────────────────────────────────────┘\n', KenKeyManager.styles.title);
 }
 
 // Inicializa o sistema quando o documento estiver pronto
