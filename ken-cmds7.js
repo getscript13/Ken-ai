@@ -24,15 +24,10 @@ class KenCommands {
             const panel = document.querySelector('.ken-ai-panel');
             if (panel) {
                 const isVisible = panel.classList.contains('active');
-                
-                // Animação suave
-                panel.style.transition = 'all 0.3s ease';
                 if (isVisible) {
-                    panel.style.transform = 'translateX(100%)';
-                    setTimeout(() => panel.classList.remove('active'), 300);
+                    panel.classList.remove('active');
                 } else {
                     panel.classList.add('active');
-                    setTimeout(() => panel.style.transform = 'translateX(0)', 10);
                 }
                 
                 this.showMessage('Painel', isVisible ? 'Ocultado 👻' : 'Exibido 👋', 'info');
@@ -170,5 +165,11 @@ window.kenCmd = {
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', () => {
-    KenCommands.showMessage('Sistema', 'Comandos Ken AI inicializados! Use kenCmd.help() para ajuda 🚀', 'success');
+    KenCommands.showMessage('Sistema', 'Comandos Ken AI inicializados! 🚀', 'success');
+    
+    // Pequena pausa para melhor legibilidade no console
+    setTimeout(() => {
+        console.log('\n%c┌── LISTA DE COMANDOS DISPONÍVEIS ─────────────────┐', KenCommands.styles.title);
+        KenCommands.help();
+    }, 100);
 });
