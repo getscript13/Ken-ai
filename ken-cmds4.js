@@ -1,5 +1,13 @@
 // Sistema de Comandos do Ken AI
-window.kenCmd = {
+// Aguarda a inicialização do painel do Ken AI
+(function() {
+    function initializeCommands() {
+        if (!document.querySelector('.ken-ai-panel')) {
+            setTimeout(initializeCommands, 1000); // Tenta novamente em 1 segundo
+            return;
+        }
+        
+        window.kenCmd = {
     // Controles do Painel
     panel: {
         open: () => {
@@ -75,5 +83,10 @@ window.kenCmd = {
     }
 };
 
-// Mostrar comandos disponíveis ao carregar
-window.kenCmd.help();
+        // Mostrar comandos disponíveis ao carregar
+        window.kenCmd.help();
+    }
+
+    // Inicia o processo de inicialização
+    initializeCommands();
+})();
