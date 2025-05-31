@@ -42,18 +42,17 @@ class KenCommands {
             
             KenCommands.showMessage('Painel', 'Recarregado com sucesso! ✨', 'success');
             
-            // Atualiza a tabela de status com mais detalhes
-            kenTable([
+            // Atualiza a tabela de status
+            setTimeout(() => kenTable([
                 { componente: "Painel", status: "✨", ativo: true, info: "Recarregado" },
                 { componente: "Chat", status: "💬", ativo: true, info: "Pronto" },
                 { componente: "Sistema", status: "🔌", ativo: true, info: "Online" }
             ], {
                 title: "STATUS DO SISTEMA",
                 style: "success"
-            });
+            }), 100);
         } catch (error) {
             KenCommands.showMessage('Erro', 'Falha ao recarregar o painel: ' + error.message, 'error');
-            throw error; // Re-throw para logging
         }
     }
 
@@ -148,10 +147,14 @@ class KenCommands {
                 }
             ];
 
-            kenTable(components, {
-                title: "STATUS DO SISTEMA KEN AI",
-                style: "info"
-            });
+            if (typeof kenTable === 'function') {
+                kenTable(components, {
+                    title: "STATUS DO SISTEMA KEN AI",
+                    style: "info"
+                });
+            } else {
+                throw new Error('Função kenTable não encontrada');
+            }
         } catch (error) {
             KenCommands.showMessage('Erro', 'Falha ao mostrar status: ' + error.message, 'error');
         }
@@ -168,10 +171,14 @@ class KenCommands {
                 { comando: "kenCmd.help()", descrição: "Mostra comandos", icone: "❓", exemplo: "kenCmd.help()" }
             ];
 
-            kenTable(commands, {
-                title: "COMANDOS DISPONÍVEIS",
-                style: "title"
-            });
+            if (typeof kenTable === 'function') {
+                kenTable(commands, {
+                    title: "COMANDOS DISPONÍVEIS",
+                    style: "title"
+                });
+            } else {
+                throw new Error('Função kenTable não encontrada');
+            }
         } catch (error) {
             KenCommands.showMessage('Erro', 'Falha ao mostrar comandos: ' + error.message, 'error');
         }
@@ -187,5 +194,12 @@ window.kenCmd = {
     help: () => KenCommands.showCommands()
 };
 
-// Mostra mensagem de inicialização
-KenCommands.showMessage('Sistema de Comandos', 'Iniciado com sucesso! Use kenCmd.help() para ver os comandos', 'success');
+// Verifica se a função kenTable está disponível
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof kenTable !== 'function') {
+        console.error('%c[Ken AI]%c Erro: Sistema de tabelas não encontrado!', 
+            'color: #F44336; font-weight: bold;',
+            'color: inherit;'
+        );
+    }
+});
