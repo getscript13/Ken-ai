@@ -10,8 +10,10 @@
 // @require      https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js
 // @require      https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js
 // @require      https://raw.githubusercontent.com/getscript13/Ken-ai/refs/heads/main/ken-ai.ui1.js
-// @require      https://raw.githubusercontent.com/getscript13/Ken-ai/refs/heads/main/Ken-Key2.js
-// @require      https://raw.githubusercontent.com/getscript13/Ken-ai/refs/heads/main/ken-prompt2.js
+// @require      https://raw.githubusercontent.com/getscript13/Ken-ai/refs/heads/main/Ken-Key.js
+// @require      https://raw.githubusercontent.com/getscript13/Ken-ai/refs/heads/main/ken-promptv2.js
+// @require      https://raw.githubusercontent.com/getscript13/Ken-ai/refs/heads/main/ken-table.js
+// @require      https://raw.githubusercontent.com/getscript13/Ken-ai/refs/heads/main/ken-cmds.js
 // ==/UserScript==
 
 (function() {
