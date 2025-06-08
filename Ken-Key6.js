@@ -35,6 +35,40 @@ class KenKeyManager {
         if (modelSelector) {
             modelSelector.value = model;
         }
+
+        // Envia mensagem no chat sobre a mudança de modelo
+        this.sendModelChangeMessage(model);
+    }
+
+    // Novo método para enviar mensagem no chat
+    sendModelChangeMessage(model) {
+        // Encontra o container de mensagens do chat
+        const chatContainer = document.querySelector('.message-list') || document.querySelector('.chat-messages');
+        
+        if (chatContainer) {
+            // Cria a mensagem do sistema
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message system-message';
+            messageDiv.style.cssText = `
+                padding: 8px 12px;
+                margin: 8px 0;
+                background: rgba(33, 150, 243, 0.1);
+                border-left: 3px solid #2196F3;
+                color: #1976D2;
+                font-weight: bold;
+                border-radius: 4px;
+            `;
+            
+            // Define o texto da mensagem
+            const modelName = model === 'deepseek' ? 'DeepSeek AI' : 'Google Gemini';
+            messageDiv.textContent = `🔄 Ken AI agora está usando: ${modelName}`;
+            
+            // Adiciona a mensagem ao chat
+            chatContainer.appendChild(messageDiv);
+            
+            // Rola para a última mensagem
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
     }
 
     getCurrentModel() {
@@ -56,6 +90,10 @@ class KenKeyManager {
                         "model": "deepseek/deepseek-r1-0528:free",
                         "messages": [
                             {
+                                "role": "system",
+                                "content": "Você é o DeepSeek, um assistente AI desenvolvido pela DeepSeek. Quando perguntarem qual modelo você é, responda que é o DeepSeek."
+                            },
+                            {
                                 "role": "user",
                                 "content": prompt
                             }
@@ -68,12 +106,11 @@ class KenKeyManager {
                     throw new Error(data.error.message || 'Erro ao processar requisição DeepSeek');
                 }
 
-                // Retorna o texto da resposta no mesmo formato que o Gemini espera
                 return {
                     text: () => Promise.resolve(data.choices[0].message.content)
                 };
             } else {
-                // Requisição original do Gemini
+                // Requisição original do Gemini com mensagem do sistema
                 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${this.currentKey}`;
                 const response = await fetch(API_URL, {
                     method: 'POST',
@@ -83,7 +120,7 @@ class KenKeyManager {
                     body: JSON.stringify({
                         contents: [{
                             parts: [{
-                                text: prompt
+                                text: "Você é o Gemini, um modelo de linguagem desenvolvido pelo Google. Quando perguntarem qual modelo você é, responda que é o Gemini.\n\n" + prompt
                             }]
                         }]
                     })
