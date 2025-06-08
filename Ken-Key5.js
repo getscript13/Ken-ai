@@ -42,29 +42,62 @@ class KenKeyManager {
     }
 
     async makeRequest(prompt) {
-        if (this.currentModel === 'deepseek') {
-            const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${this.currentKey}`,
-                    "HTTP-Referer": "https://plurall.net",
-                    "X-Title": "Ken AI Plurall",
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    "model": "deepseek/deepseek-r1-0528:free",
-                    "messages": [
-                        {
-                            "role": "user",
-                            "content": prompt
-                        }
-                    ]
-                })
-            });
-            return response;
-        } else {
-            // Lógica existente do Gemini
-            // ...existing code...
+        try {
+            if (this.currentModel === 'deepseek') {
+                const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${this.currentKey}`,
+                        "HTTP-Referer": "https://plurall.net",
+                        "X-Title": "Ken AI Plurall",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "model": "deepseek/deepseek-r1-0528:free",
+                        "messages": [
+                            {
+                                "role": "user",
+                                "content": prompt
+                            }
+                        ]
+                    })
+                });
+
+                const data = await response.json();
+                if (data.error) {
+                    throw new Error(data.error.message || 'Erro ao processar requisição DeepSeek');
+                }
+
+                // Retorna o texto da resposta no mesmo formato que o Gemini espera
+                return {
+                    text: () => Promise.resolve(data.choices[0].message.content)
+                };
+            } else {
+                // Requisição original do Gemini
+                const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${this.currentKey}`;
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: prompt
+                            }]
+                        }]
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erro na requisição Gemini');
+                }
+
+                return response;
+            }
+        } catch (error) {
+            console.error('Erro na requisição:', error);
+            throw error;
         }
     }
 
