@@ -1,7 +1,9 @@
 class KenKeyManager {
     constructor() {
-        this.defaultKey = 'AIzaSyAgIVvbWy5DPHI18c_2Vjnw1nMS1Z4iV0Q';
-        this.currentKey = window.GEMINI_API_KEY || this.defaultKey;
+        this.defaultGeminiKey = 'AIzaSyAgIVvbWy5DPHI18c_2Vjnw1nMS1Z4iV0Q';
+        this.defaultDeepseekKey = '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';
+        this.currentModel = 'gemini';
+        this.currentKey = window.GEMINI_API_KEY || this.defaultGeminiKey;
     }
 
     static styles = {
@@ -13,6 +15,58 @@ class KenKeyManager {
         divider: 'color: #E0E0E0; font-size: 14px;',
         reset: 'color: inherit;'
     };
+
+    setModel(model) {
+        this.currentModel = model;
+        if (model === 'gemini') {
+            this.currentKey = window.GEMINI_API_KEY || this.defaultGeminiKey;
+        } else if (model === 'deepseek') {
+            this.currentKey = this.defaultDeepseekKey;
+        }
+        
+        this.showTable([
+            ['STATUS', 'Modelo Alterado ✓'],
+            ['MODELO ATUAL', model.toUpperCase()],
+            ['CHAVE', this.currentKey]
+        ], 'success');
+
+        // Atualiza o texto do seletor no painel
+        const modelSelector = document.querySelector('#kenai-model-selector');
+        if (modelSelector) {
+            modelSelector.value = model;
+        }
+    }
+
+    getCurrentModel() {
+        return this.currentModel;
+    }
+
+    async makeRequest(prompt) {
+        if (this.currentModel === 'deepseek') {
+            const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${this.currentKey}`,
+                    "HTTP-Referer": "https://plurall.net",
+                    "X-Title": "Ken AI Plurall",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    "model": "deepseek/deepseek-r1-0528:free",
+                    "messages": [
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
+                    ]
+                })
+            });
+            return response;
+        } else {
+            // Lógica existente do Gemini
+            // ...existing code...
+        }
+    }
 
     setKey(key) {
         if (!key) {
@@ -32,12 +86,12 @@ class KenKeyManager {
     }
 
     resetKey() {
-        window.GEMINI_API_KEY = this.defaultKey;
-        this.currentKey = this.defaultKey;
+        window.GEMINI_API_KEY = this.defaultGeminiKey;
+        this.currentKey = this.defaultGeminiKey;
         
         this.showTable([
             ['STATUS', 'Chave Restaurada ✓'],
-            ['CHAVE PADRÃO', this.defaultKey]
+            ['CHAVE PADRÃO', this.defaultGeminiKey]
         ], 'info');
     }
 
@@ -51,8 +105,10 @@ class KenKeyManager {
             ['kenKey.set("CHAVE")', 'Define nova chave API'],
             ['kenKey.reset()', 'Restaura chave padrão'],
             ['kenKey.show()', 'Mostra chave atual'],
+            ['kenKey.setModel("modelo")', 'Alterna entre gemini/deepseek'],
             ['kenKey.help()', 'Exibe este menu de ajuda'],
             ['', ''],
+            ['MODELO ATUAL', this.currentModel.toUpperCase()],
             ['CHAVE ATUAL', this.currentKey]
         ], 'title');
     }
@@ -99,11 +155,15 @@ function initializeKeySystem() {
         },
         show: function() {
             keyManager.showTable([
+                ['MODELO ATUAL', keyManager.getCurrentModel().toUpperCase()],
                 ['CHAVE ATUAL', keyManager.getKey()]
             ], 'info');
         },
         help: function() {
             keyManager.showCommands();
+        },
+        setModel: function(model) {
+            keyManager.setModel(model);
         }
     };
 
